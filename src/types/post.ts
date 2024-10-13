@@ -15,6 +15,6 @@ export interface SupportPost {
   }
   
   export interface GetPostsResponse {
-    posts: SupportPost[]; // Use the correct interface name
+    posts: SupportPost[]; 
   }
   

@@ -19,7 +19,7 @@ app.use(json());
 app.get('/', async (req, res) => {
     try {
         const { data: posts, error: postError } = await supabase
-            .from('supportpost') // Corrected table name
+            .from('supportpost')
             .select('*')
             .order('timestamp', { ascending: false });
 
@@ -30,16 +30,16 @@ app.get('/', async (req, res) => {
         const postsWithDetails = await Promise.all(
             posts.map(async (post) => {
                 const { data: comments } = await supabase
-                    .from('supportcomment') // Corrected table name
+                    .from('supportcomment')
                     .select('*')
-                    .eq('postid', post.id); // Ensure this matches your schema
+                    .eq('postid', post.id);
 
                 const commentsWithLikes = await Promise.all(
                     (comments || []).map(async (comment) => {
                         const { count: commentLikeCount } = await supabase
-                            .from('postlike') // Corrected table name
+                            .from('postlike')
                             .select('id', { count: 'exact', head: true })
-                            .eq('commentid', comment.id); // Ensure this matches your schema
+                            .eq('commentid', comment.id);
 
                         return {
                             ...comment,
@@ -49,9 +49,9 @@ app.get('/', async (req, res) => {
                 );
 
                 const { count: likeCount } = await supabase
-                    .from('postlike') // Corrected table name
+                    .from('postlike')
                     .select('id', { count: 'exact', head: true })
-                    .eq('postid', post.id); // Ensure this matches your schema
+                    .eq('postid', post.id);
 
                 return {
                     ...post,
@@ -76,12 +76,11 @@ app.get('/', async (req, res) => {
     }
 });
 
-// Define your API routes
 app.use('/api/forums', forumRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/likes', likeRouter);
-app.use('/api/comments/:id/likes', commentLikeRouter); // Changed route
+app.use('/api/comments/:id/likes', commentLikeRouter);
 
 app.use(errorHandler);
 

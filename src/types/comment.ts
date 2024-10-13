@@ -17,6 +17,6 @@ export interface SupportComment {
   }
   
   export interface GetCommentsResponse {
-    comments: SupportComment[]; // Use the correct interface name
+    comments: SupportComment[];
   }
   

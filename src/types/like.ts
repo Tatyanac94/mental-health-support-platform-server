@@ -1,7 +1,7 @@
 export interface PostLike {
     id: number;
     postId: number; 
-    commentId?: number; // Optional property
+    commentId?: number;
     timestamp: string; 
   }
   
@@ -16,7 +16,7 @@ export interface PostLike {
   export interface CreateLikeResponse {
     id: number;
     postId: number; 
-    commentId?: number; // Optional property
+    commentId?: number;
     timestamp: string;
   }
   
