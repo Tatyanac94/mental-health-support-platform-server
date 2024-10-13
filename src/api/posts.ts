@@ -19,33 +19,26 @@ router.get('/comments/:id/likes', async (req: Request, res: Response) => {
   res.json(likes || []);
 });
 
-router.post('/comments/:id/likes', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { username } = req.body;
+router.post('/', async (req: Request, res: Response) => {
+    const { content, forumid, username } = req.body; 
 
-  const { data: comment, error: commentError } = await supabase
-    .from('supportcomment')
-    .select('id')
-    .eq('id', id)
-    .single();
+    if (!content || !forumid) {
+        return res.status(400).json({ error: 'Content and forumId cannot be empty' });
+    }
 
-  if (commentError || !comment) {
-    console.error('Comment not found:', commentError);
-    return res.status(404).json({ error: 'Comment not found' });
-  }
+    const { data: newPost, error } = await supabase
+        .from('supportpost')
+        .insert([{ content, forumid, username }])  
+        .single();
 
-  const { data: newLike, error: likeError } = await supabase
-    .from('postlike')
-    .insert([{ commentid: comment.id, username }])
-    .single();
+    if (error) {
+        console.error('Error creating post:', error);
+        return res.status(500).json({ error: 'Failed to create post' });
+    }
 
-  if (likeError) {
-    console.error('Error liking comment:', likeError);
-    return res.status(500).json({ error: 'Failed to like comment' });
-  }
-
-  res.status(201).json(newLike);
+    res.status(201).json(newPost);
 });
+
 
 router.delete('/comments/likes/:likeId', async (req: Request, res: Response) => {
   const { likeId } = req.params;
