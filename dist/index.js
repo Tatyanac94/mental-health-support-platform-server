@@ -20,6 +20,13 @@ app.use((0, cors_1.default)());
 app.use((0, express_2.json)());
 app.get('/', async (req, res) => {
     try {
+        const { data: forums, error: forumError } = await supabase_1.supabase
+            .from('forum')
+            .select('*')
+            .order('timestamp', { ascending: false });
+        if (forumError) {
+            return res.status(500).json({ error: forumError.message });
+        }
         const { data: posts, error: postError } = await supabase_1.supabase
             .from('supportpost')
             .select('*')
@@ -28,6 +35,10 @@ app.get('/', async (req, res) => {
             return res.status(500).json({ error: postError.message });
         }
         const postsWithDetails = await Promise.all(posts.map(async (post) => {
+            const { count: likeCount } = await supabase_1.supabase
+                .from('postlike')
+                .select('id', { count: 'exact', head: true })
+                .eq('postid', post.id);
             const { data: comments } = await supabase_1.supabase
                 .from('supportcomment')
                 .select('*')
@@ -42,24 +53,27 @@ app.get('/', async (req, res) => {
                     likeCount: commentLikeCount || 0,
                 };
             }));
-            const { count: likeCount } = await supabase_1.supabase
-                .from('postlike')
-                .select('id', { count: 'exact', head: true })
-                .eq('postid', post.id);
             return {
                 ...post,
                 comments: commentsWithLikes,
                 likeCount: likeCount || 0,
             };
         }));
-        const formattedPosts = postsWithDetails.map(post => ({
-            content: post.content,
-            username: post.username,
-            timestamp: post.timestamp,
-            likeCount: post.likeCount,
-            comments: post.comments,
+        const forumsWithPosts = forums.map(forum => ({
+            forumId: forum.id,
+            forumName: forum.name,
+            forumDescription: forum.description,
+            posts: postsWithDetails
+                .filter(post => post.forumid === forum.id)
+                .map(post => ({
+                content: post.content,
+                username: post.username,
+                timestamp: post.timestamp,
+                likeCount: post.likeCount,
+                comments: post.comments,
+            })),
         }));
-        res.json(formattedPosts);
+        res.json(forumsWithPosts);
     }
     catch (err) {
         console.error('Server Error:', err);
