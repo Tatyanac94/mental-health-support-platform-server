@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase';
 
 const router = Router();
 
+//Creates a new forum with the provided name and description.
 router.post('/', async (req: Request, res: Response) => {
     const { name, description } = req.body;
 
@@ -23,6 +24,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json(newForum);
 });
 
+ // Fetches all forums, ordered by timestamp.
 router.get('/', async (req: Request, res: Response) => {
     const { data: forums, error } = await supabase
         .from('forum')
@@ -37,6 +39,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(forums || []);
 });
 
+ // Fetches a specific forum by its ID.
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -54,6 +57,24 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json(forum);
 });
 
+// Fetches all posts associated with a specific forum by its ID.
+router.get('/:id/posts', async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const { data: posts, error } = await supabase
+        .from('supportpost') // Ensure this matches your actual posts table name
+        .select('*')
+        .eq('forumid', id); // Assuming you have a foreign key field in posts table
+
+    if (error) {
+        console.error('Error fetching posts:', error);
+        return res.status(500).json({ error: 'Failed to fetch posts' });
+    }
+
+    res.json(posts || []);
+});
+
+ // Updates the name and description of a specific forum by its ID.
 router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, description } = req.body;
@@ -66,6 +87,7 @@ router.put('/:id', async (req: Request, res: Response) => {
         .from('forum')
         .update({ name, description })
         .eq('id', id)
+        .select()  
         .single();
 
     if (error) {
@@ -74,12 +96,14 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     if (!data) {
+
         return res.status(404).json({ error: 'Forum not found' });
     }
 
-    res.json(data);
+    res.json({ message: 'Forum updated successfully', forum: data });
 });
 
+// Deletes a specific forum by its ID.
 router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 

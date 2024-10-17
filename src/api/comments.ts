@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(validateContent);
 
+// Creates a new comment for a specific post identified by its ID.
 router.post('/posts/:id/comments', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { content, username } = req.body;
@@ -37,6 +38,7 @@ router.post('/posts/:id/comments', async (req: Request, res: Response) => {
     res.status(201).json(comment);
 });
 
+// Retrieves all comments associated with a specific post identified by its ID.
 router.get('/posts/:id/comments', async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -63,6 +65,7 @@ router.get('/posts/:id/comments', async (req: Request, res: Response) => {
     res.json(comments);
 });
 
+// Updates the content of a specific comment identified by its comment ID.
 router.put('/comments/:commentid', async (req: Request, res: Response) => {
     const { commentid } = req.params;
     const { content } = req.body;
@@ -89,6 +92,7 @@ router.put('/comments/:commentid', async (req: Request, res: Response) => {
     res.json(data);
 });
 
+// Deletes a specific comment identified by its comment ID.
 router.delete('/comments/:commentid', async (req: Request, res: Response) => {
     const { commentid } = req.params;
 
