@@ -5,6 +5,7 @@ const express_1 = require("express");
 const supabase_1 = require("../config/supabase");
 const router = (0, express_1.Router)();
 exports.router = router;
+// Retrieves all likes for a specific post identified by its ID.
 router.get('/posts/:id/likes', async (req, res) => {
     const { id } = req.params;
     const { data: likes, error } = await supabase_1.supabase
@@ -17,6 +18,7 @@ router.get('/posts/:id/likes', async (req, res) => {
     }
     res.json(likes || []);
 });
+// Creates a new like for a specific post identified by its ID.
 router.post('/posts/:id/likes', async (req, res) => {
     const { id } = req.params;
     const { username } = req.body;
@@ -39,6 +41,7 @@ router.post('/posts/:id/likes', async (req, res) => {
     }
     res.status(201).json(newLike);
 });
+// Deletes a specific like identified by its like ID.
 router.delete('/likes/:likeId', async (req, res) => {
     const { likeId } = req.params;
     const { error } = await supabase_1.supabase

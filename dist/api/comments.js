@@ -7,6 +7,7 @@ const validation_1 = require("../middleware/validation");
 const router = (0, express_1.Router)();
 exports.router = router;
 router.use(validation_1.validateContent);
+// Creates a new comment for a specific post identified by its ID.
 router.post('/posts/:id/comments', async (req, res) => {
     const { id } = req.params;
     const { content, username } = req.body;
@@ -31,6 +32,7 @@ router.post('/posts/:id/comments', async (req, res) => {
     }
     res.status(201).json(comment);
 });
+// Retrieves all comments associated with a specific post identified by its ID.
 router.get('/posts/:id/comments', async (req, res) => {
     const { id } = req.params;
     const { data: post, error: postError } = await supabase_1.supabase
@@ -51,6 +53,7 @@ router.get('/posts/:id/comments', async (req, res) => {
     }
     res.json(comments);
 });
+// Updates the content of a specific comment identified by its comment ID.
 router.put('/comments/:commentid', async (req, res) => {
     const { commentid } = req.params;
     const { content } = req.body;
@@ -71,6 +74,7 @@ router.put('/comments/:commentid', async (req, res) => {
     }
     res.json(data);
 });
+// Deletes a specific comment identified by its comment ID.
 router.delete('/comments/:commentid', async (req, res) => {
     const { commentid } = req.params;
     const { data, error } = await supabase_1.supabase
