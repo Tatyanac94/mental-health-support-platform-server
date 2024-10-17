@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase';
 
 const router = Router();
 
+// Retrieves all likes for a specific post identified by its ID.
 router.get('/posts/:id/likes', async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -19,6 +20,7 @@ router.get('/posts/:id/likes', async (req: Request, res: Response) => {
   res.json(likes || []); 
 });
 
+// Creates a new like for a specific post identified by its ID.
 router.post('/posts/:id/likes', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { username } = req.body;
@@ -47,6 +49,7 @@ router.post('/posts/:id/likes', async (req: Request, res: Response) => {
   res.status(201).json(newLike); 
 });
 
+// Deletes a specific like identified by its like ID.
 router.delete('/likes/:likeId', async (req: Request, res: Response) => {
   const { likeId } = req.params;
 
