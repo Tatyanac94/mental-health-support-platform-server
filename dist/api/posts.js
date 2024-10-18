@@ -5,42 +5,53 @@ const express_1 = require("express");
 const supabase_1 = require("../config/supabase");
 const router = (0, express_1.Router)();
 exports.router = router;
-// Fetches all likes associated with a specific comment by its ID.
-router.get('/comments/:id/likes', async (req, res) => {
-    const { id } = req.params;
-    const { data: likes, error } = await supabase_1.supabase
-        .from('postlike')
-        .select('*')
-        .eq('commentid', id);
+// Fetches all posts along with their like counts
+router.get('/', async (req, res) => {
+    const { data: posts, error } = await supabase_1.supabase.from('supportpost').select('*');
     if (error) {
-        console.error('Error fetching likes:', error);
-        return res.status(500).json({ error: 'Failed to fetch likes' });
+        console.error('Error fetching posts:', error);
+        return res.status(500).json({ error: 'Failed to fetch posts' });
     }
-    res.json(likes || []);
+    // Fetch like counts for each post
+    const postsWithLikes = await Promise.all(posts.map(async (post) => {
+        const { count: likeCount } = await supabase_1.supabase
+            .from('postlike')
+            .select('id', { count: 'exact', head: true })
+            .eq('postid', post.id);
+        return {
+            ...post,
+            likeCount: likeCount || 0,
+        };
+    }));
+    res.json(postsWithLikes);
 });
-// Fetches details of a specific forum and its associated posts by forum ID.
-router.get('/:id/details', async (req, res) => {
+// Fetches a specific post by its ID along with its like count
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
-    const { data: forum, error: forumError } = await supabase_1.supabase
-        .from('forum')
+    // Fetch the post
+    const { data: post, error: postError } = await supabase_1.supabase
+        .from('supportpost')
         .select('*')
         .eq('id', id)
         .single();
-    if (forumError || !forum) {
-        console.error('Forum not found:', forumError);
-        return res.status(404).json({ error: 'Forum not found' });
+    if (postError) {
+        console.error('Error fetching post:', postError);
+        return res.status(500).json({ error: 'Failed to fetch post' });
     }
-    const { data: posts, error: postsError } = await supabase_1.supabase
-        .from('supportpost')
-        .select('*')
-        .eq('forumid', id);
-    if (postsError) {
-        console.error('Error fetching posts:', postsError);
-        return res.status(500).json({ error: 'Failed to fetch posts' });
+    if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
     }
-    res.json({ forum, posts: posts || [] });
+    // Fetch the like count for the specific post
+    const { count: likeCount } = await supabase_1.supabase
+        .from('postlike')
+        .select('id', { count: 'exact', head: true })
+        .eq('postid', id);
+    res.json({
+        ...post,
+        likeCount: likeCount || 0,
+    });
 });
-// Creates a new post for a specific forum with provided content and username.
+// Creates a new post associated with a forum
 router.post('/', async (req, res) => {
     const { content, forumid, username } = req.body;
     if (!content || !forumid) {
@@ -56,7 +67,37 @@ router.post('/', async (req, res) => {
     }
     res.status(201).json(newPost);
 });
-// Deletes a like associated with a specific comment by like ID.
+// Fetches all likes associated with a specific post
+router.get('/:id/likes', async (req, res) => {
+    const { id } = req.params;
+    const { data: likes, error } = await supabase_1.supabase
+        .from('postlike')
+        .select('*')
+        .eq('postid', id);
+    if (error) {
+        console.error('Error fetching likes:', error);
+        return res.status(500).json({ error: 'Failed to fetch likes' });
+    }
+    res.json(likes || []);
+});
+// Fetches a specific post by its ID
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { data: post, error } = await supabase_1.supabase
+        .from('supportpost')
+        .select('*')
+        .eq('id', id)
+        .single();
+    if (error) {
+        console.error('Error fetching post:', error);
+        return res.status(500).json({ error: 'Failed to fetch post' });
+    }
+    if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json(post);
+});
+// Deletes a like for a specific comment
 router.delete('/comments/likes/:likeId', async (req, res) => {
     const { likeId } = req.params;
     const { error } = await supabase_1.supabase
@@ -68,4 +109,17 @@ router.delete('/comments/likes/:likeId', async (req, res) => {
         return res.status(500).json({ error: 'Failed to delete like' });
     }
     res.json({ message: 'Like deleted successfully' });
+});
+// Adds a like to a specific post
+router.post('/:id/likes', async (req, res) => {
+    const { id } = req.params;
+    const { username } = req.body;
+    const { error } = await supabase_1.supabase
+        .from('postlike')
+        .insert([{ postid: id, username: username }]);
+    if (error) {
+        console.error('Error adding like:', error);
+        return res.status(500).json({ error: 'Failed to add like' });
+    }
+    res.status(201).json({ message: 'Like added successfully' });
 });
