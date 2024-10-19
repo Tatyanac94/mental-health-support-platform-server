@@ -100,6 +100,8 @@ app.use('/api/comments/:id/likes', commentLikeRouter);
 
 app.use(errorHandler);
 
+export default app;
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
