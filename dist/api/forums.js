@@ -99,12 +99,27 @@ const express_1 = require("express");
 const supabase_1 = require("../config/supabase");
 const router = (0, express_1.Router)();
 exports.router = router;
-// Creates a new forum
+// // Creates a new forum
+// router.post('/', async (req: Request, res: Response) => {
+//   const { title, description } = req.body;
+//   const { data: newForum, error } = await supabase
+//     .from('forum')
+//     .insert([{ title, description }])
+//     .single();
+//   if (error) {
+//     console.error('Error creating forum:', error);
+//     return res.status(500).json({ error: 'Failed to create forum' });
+//   }
+//   res.status(201).json(newForum);
+// });
 router.post('/', async (req, res) => {
-    const { title, description } = req.body;
+    const { name, description } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Name cannot be empty' });
+    }
     const { data: newForum, error } = await supabase_1.supabase
         .from('forum')
-        .insert([{ title, description }])
+        .insert([{ name, description }])
         .single();
     if (error) {
         console.error('Error creating forum:', error);

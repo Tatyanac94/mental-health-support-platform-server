@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
+
 const router = Router();
 
-// Retrieves all likes for a specific comment identified by its ID.
 router.get('/comments/:id/likes', async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -20,7 +20,6 @@ router.get('/comments/:id/likes', async (req: Request, res: Response) => {
   res.json(likes || []);
 });
 
-// Creates a new like for a specific comment identified by its ID.
 router.post('/comments/:id/likes', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { username } = req.body;
@@ -49,7 +48,6 @@ router.post('/comments/:id/likes', async (req: Request, res: Response) => {
   res.status(201).json(newLike);
 });
 
-// Deletes a specific like identified by its like ID for a comment.
 router.delete('/comments/likes/:likeId', async (req: Request, res: Response) => {
   const { likeId } = req.params;
 

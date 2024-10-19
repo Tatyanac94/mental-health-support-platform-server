@@ -151,22 +151,45 @@ import { supabase } from '../config/supabase';
 
 const router = Router();
 
-// Creates a new forum
+// // Creates a new forum
+// router.post('/', async (req: Request, res: Response) => {
+//   const { title, description } = req.body;
+
+//   const { data: newForum, error } = await supabase
+//     .from('forum')
+//     .insert([{ title, description }])
+//     .single();
+
+//   if (error) {
+//     console.error('Error creating forum:', error);
+//     return res.status(500).json({ error: 'Failed to create forum' });
+//   }
+
+//   res.status(201).json(newForum);
+// });
+
+
 router.post('/', async (req: Request, res: Response) => {
-  const { title, description } = req.body;
+    const { name, description } = req.body;
 
-  const { data: newForum, error } = await supabase
-    .from('forum')
-    .insert([{ title, description }])
-    .single();
+    if (!name) {
+        return res.status(400).json({ error: 'Name cannot be empty' });
+    }
 
-  if (error) {
-    console.error('Error creating forum:', error);
-    return res.status(500).json({ error: 'Failed to create forum' });
-  }
+    const { data: newForum, error } = await supabase
+        .from('forum')
+        .insert([{ name, description }])
+        .single();
 
-  res.status(201).json(newForum);
+    if (error) {
+        console.error('Error creating forum:', error);
+        return res.status(500).json({ error: 'Failed to create forum' });
+    }
+
+    res.status(201).json(newForum);
 });
+
+
 
 // Retrieves a list of all forums
 router.get('/', async (req: Request, res: Response) => {
